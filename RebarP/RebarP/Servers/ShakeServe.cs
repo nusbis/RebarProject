@@ -18,6 +18,10 @@ public class ShakeServe
     {
         return shakeCollection.Find(shake => true).ToList();
     }
+    public Shake GetById(Guid id)
+    {
+        return shakeCollection.Find(shake => shake.ID == id).FirstOrDefault();
+    }
     public void Add(Shake shake)
     {
         shakeCollection.InsertOne(shake);

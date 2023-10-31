@@ -21,4 +21,10 @@ public class ShakeController : ControllerBase
     {
        shakeServer.Add(shake);
     }
+
+    [HttpGet("GetShakeByID/{id}")]
+    public Shake GetById(Guid id)
+    {
+        return shakeServer.GetById(id);
+    }
 }

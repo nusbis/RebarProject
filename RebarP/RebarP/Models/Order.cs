@@ -1,10 +1,18 @@
-﻿namespace RebarP.Models;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace RebarP.Models;
 
 public class Order
 {
-    public Guid ID { get; private set; } = new Guid();
-    public List<ShakeOfOrder> ListOfShakes { get; private set; }
-    public DateTime DateOfOrder { get; set; }
-    public List<Discount> ListOfDiscount { get; private set; } = null;
+   // private List<ShakeOfOrder> _listOfShakes;
+    [BsonId]
+    [BsonRepresentation(BsonType.String)]
+    public Guid ID { get;} = new Guid();
+    public List<ShakeOfOrder> ListOfShakes { get; set; }
+    public DateTime StartOrder { get; set; }
+    public string NameOfCustomer { get; set; }
+    public DateTime EndOrder { get; }=DateTime.Now;
+  //  public List<Discount> ListOfDiscount { get; private set; } = null;
 
 }
