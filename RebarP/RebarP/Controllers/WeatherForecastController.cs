@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace RebarProject.Controllers
+namespace RebarP.Controllers
 {
     [ApiController]
     [Route("[controller]")]

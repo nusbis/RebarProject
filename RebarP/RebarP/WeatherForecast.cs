@@ -1,4 +1,4 @@
-namespace RebarProject
+namespace RebarP
 {
     public class WeatherForecast
     {
