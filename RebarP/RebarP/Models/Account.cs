@@ -1,23 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+using System.Collections.Generic;
 
 namespace RebarP.Models;
 
 public class Account
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.String)]
     public Guid ID { get;private set; }= Guid.NewGuid();
     public string Password { get; set; }
-    public List<Guid> ListOfOrderIDs { get; }
-
-    public void AddOrderToAccount(Guid id)
-    {
-        if (id == Guid.Empty)
-            throw new ArgumentNullException("id");
-        if (IsIdOrderExsist(id))
-            throw new Exception("this order exsist in our account");
-        ListOfOrderIDs.Add(id);
-    }
-    public bool IsIdOrderExsist(Guid id)
-    {
-        return ListOfOrderIDs.FirstOrDefault(thisId => thisId == id) != null;
-    }
+    public List<Guid> ListOfOrderIDs { get; private set; } = new List<Guid>();
 }

@@ -22,5 +22,28 @@ public class AccountService
     {
         accountCollection.InsertOne(account);
     }
+    public Account Update(Account acc)
+    {
+        var filter = Builders<Account>.Filter.Eq("ID", acc.ID);
+        accountCollection.ReplaceOne(filter, acc);
+        return acc;
+    }
+    public Account AddOrderToAccount(Guid id, Account acc)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentNullException("id");
+        if (IsIdOrderExsistInThisAccount(id, acc))
+            throw new Exception("this order exsist in our account");
+        acc.ListOfOrderIDs.Add(id);
+        acc = Update(acc);
+        return acc;
+    }
+    private bool IsIdOrderExsistInThisAccount(Guid id, Account acc)
+    {
+        if (acc.ListOfOrderIDs == null || acc.ListOfOrderIDs.Count == 0)
+            return false;
+        return acc.ListOfOrderIDs.FirstOrDefault(thisId => thisId == id)!=null;
+       
+    }
 
 }

@@ -14,8 +14,9 @@ public class OrderServer
         orderCollection = connect.ConnectToMongoDB<Order>(collectionOrder);
     }
 
-    public void Add(Order order)
+    public Order Add(Order order)
     {
         orderCollection.InsertOne(order);
+        return order;
     }
 }

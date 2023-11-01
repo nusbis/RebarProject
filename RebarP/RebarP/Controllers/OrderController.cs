@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RebarP.Models;
 using RebarP.Servers;
+using System.Text.RegularExpressions;
 
 namespace RebarP.Controllers;
 
@@ -11,7 +12,7 @@ public class OrderController : ControllerBase
 {
     private ShakeServe shakeServer = new ShakeServe();
     private OrderServer orderServer = new OrderServer();
-
+    private AccountService accountService = new AccountService();
 
 
     [HttpPost(Name = "AddOrder")]
@@ -31,7 +32,7 @@ public class OrderController : ControllerBase
         double sumOfOrder = orderForClient.lstShakes.Sum(shake => shake.Price);
         foreach (var item in orderForClient.lstShakes)
         {
-            if (shakeServer.GetById(item.IDShake)==null)
+            if (shakeServer.GetById(item.IDShake) == null)
             {
                 return BadRequest("The shake does not exist in the database");
             }
@@ -43,17 +44,29 @@ public class OrderController : ControllerBase
             NameOfCustomer=orderForClient.nameOfCustomer
         };
 
+     newOrder=  orderServer.Add(newOrder);
 
 
+        Account myAcoount = accountService.GetById(orderForClient.IdAccount);
+        if (myAcoount == null)
+            return BadRequest("Account does not exist");
+        accountService.AddOrderToAccount(newOrder.ID, myAcoount);
 
-            orderServer.Add(newOrder);
+
 
         //AddOrderToAccount
         return Ok(new { Message = "Order successfully saved", Value = sumOfOrder });
 
     }
 
+    //public bool ValidateString(string input)
+    //{
+    //    // הביטוי הרגולרי מגדיר את התנאים: בדיוק 4 אותיות אנגליות ובדיוק 2 מספרים.
+    //    string pattern = @"^[A-Za-z]{4}\d{2}$";
 
+    //    // בודקים האם המחרוזת מתאימה לתבנית הרגולרית.
+    //    return Regex.IsMatch(input, pattern);
+    //}
 
     //public bool DoesShakeExist(Guid id)
     //{
