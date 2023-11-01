@@ -12,8 +12,8 @@ public class Order
     public List<ShakeOfOrder> ListOfShakes { get; set; }
     public DateTime StartOrder { get; set; }
     public string NameOfCustomer { get; set; }
-    public DateTime EndOrder { get; }=DateTime.Now;
-    public List<Discount> ListOfDiscount { get; private set; } = new List<Discount>();
+    public DateTime EndOrder { get; private set; } =DateTime.Now;
+    public List<Discount> ListOfDiscount { get; set; }
     public double TotalPrice { get; set; }
 
 }

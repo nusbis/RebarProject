@@ -32,7 +32,6 @@ public class OrderService
         return order;
     }
 
-
     public List<Order> GetAllOrdersById(List<Guid> idsOfToday)
     {
         return idsOfToday.Select(id => GetById(id)).Where(order=>order.EndOrder==DateTime.Today).ToList();

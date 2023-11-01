@@ -29,4 +29,16 @@ public static class Validation
             throw new Exception("One of the prices for the shake is missing. We cannot add a shake when one of the sizes is missing a price");
 
     }
+
+    public static Order BuildOrder(OrderForClient orderForClient,double sumOfOrder)
+    {
+        return new Order
+        {
+            ListOfShakes = orderForClient.lstShakes,
+            StartOrder = DateTime.Parse(orderForClient.dateOfStartOrder),
+            NameOfCustomer = orderForClient.nameOfCustomer,
+            TotalPrice = sumOfOrder,
+            ListOfDiscount=orderForClient.ListOfDiscount
+        };
+    }
 }
