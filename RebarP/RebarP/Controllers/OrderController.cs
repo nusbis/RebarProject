@@ -11,8 +11,8 @@ namespace RebarP.Controllers;
 public class OrderController : ControllerBase
 {
     private ShakeServe shakeServer = new ShakeServe();
-    private OrderServer orderServer = new OrderServer();
-    private AccountService accountService = new AccountService();
+    private OrderService orderServer = new OrderService();
+    private CheckoutService accountService = new CheckoutService();
 
 
     [HttpPost(Name = "AddOrder")]
@@ -30,34 +30,43 @@ public class OrderController : ControllerBase
 
 
         double sumOfOrder = orderForClient.lstShakes.Sum(shake => shake.Price);
-        foreach (var item in orderForClient.lstShakes)
+
+        if (orderForClient.lstShakes.Any(item => shakeServer.GetById(item.IDShake) == null))
         {
-            if (shakeServer.GetById(item.IDShake) == null)
-            {
-                return BadRequest("The shake does not exist in the database");
-            }
+            return BadRequest("The shake does not exist in the database");
         }
+
         Order newOrder = new Order
         {
             ListOfShakes = orderForClient.lstShakes,
             StartOrder = resultDateOfStartOrder,
-            NameOfCustomer=orderForClient.nameOfCustomer
+            NameOfCustomer = orderForClient.nameOfCustomer
         };
-
-     newOrder=  orderServer.Add(newOrder);
-
-
-        Account myAcoount = accountService.GetById(orderForClient.IdAccount);
+        newOrder = orderServer.Add(newOrder);
+        Checkout myAcoount = accountService.GetById(orderForClient.IdAccount);
         if (myAcoount == null)
             return BadRequest("Account does not exist");
-        accountService.AddOrderToAccount(newOrder.ID, myAcoount);
 
-
-
-        //AddOrderToAccount
+        try { accountService.AddOrderToAccount(newOrder.ID, myAcoount); }
+        catch (Exception ex)
+        {
+            orderServer.Delete(newOrder.ID);
+            return BadRequest("We cant add your order in to this account becouse: " + ex.Message);
+        }
         return Ok(new { Message = "Order successfully saved", Value = sumOfOrder });
-
     }
+
+
+
+
+
+    //foreach (var item in orderForClient.lstShakes)
+    //{
+    //    if (shakeServer.GetById(item.IDShake) == null)
+    //    {
+    //        return BadRequest("The shake does not exist in the database");
+    //    }
+    //}
 
     //public bool ValidateString(string input)
     //{

@@ -30,12 +30,10 @@ public class ShakeServe
     {
         var filter = Builders<Shake>.Filter.Eq("Id", shake.ID);
         shakeCollection.ReplaceOne(filter, shake);
-        //  return shakeCollection.ReplaceOneAsync(filter, shake, new ReplaceOptions { IsUpsert = true });
     }
     public void Delete(Guid id)
     {
         shakeCollection.DeleteOne(s => s.ID == id);
-        // return shakeCollection.DeleteOneAsync(s => s.Id == shake.Id);
     }
 
 }
