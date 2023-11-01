@@ -25,6 +25,8 @@ public class CheckoutService
     }
     public void Add(Checkout checkout)
     {
+        if (GetByPassword(checkout.Password) != null)
+            throw new ArgumentException("This password is taken by the system. Please choose a different password");
         accountCollection.InsertOne(checkout);
     }
     public Checkout Update(Checkout checkout)

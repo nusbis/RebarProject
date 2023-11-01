@@ -11,47 +11,52 @@ public class CheckoutController : ControllerBase
     private OrderService orderService = new OrderService();
 
 
-    //[HttpPost(Name = "AddAcoount")]
-    //public void AddAccount(Checkout account)
-    //{
-    //    checkoutService.Add(account);
-    //}
-
-    [HttpGet("GetAccountByID/{id}")]
-    public Checkout GetById(Guid id)
+    [HttpPost(Name = "AddAcoount")]
+    public IActionResult AddCheckout(Checkout chechout)
     {
-        return checkoutService.GetById(id);
+        try { checkoutService.Add(chechout); return Ok("The checkout has been successfully added"); }
+        catch (ArgumentException ex) { return BadRequest(ex.Message); }
+        catch(Exception) { return BadRequest("Error connecting to the database"); }
     }
-    //[HttpPost(Name = "CloseAcoountForToday")]
-    //public IActionResult CloseAcoountForToday(string password)
-    //{
-    //    int countOfOrders;
-    //    double totalPriceForToday=0;
-    //    List<Order> idsOfOrderOfToday;
-    //    if (password == null) return BadRequest("We cant close this checkout fot today becouse the password is empty");
-    //    Checkout mycheckout = checkoutService.GetByPassword(password);
-    //    if (mycheckout == null) return BadRequest("there are no checkout with this password!");
-    //    if (mycheckout.ListOfOrderIDs == null) countOfOrders = 0;
-    //    countOfOrders = mycheckout.ListOfOrderIDs.Count();
-    //    //List<Guid> orderIDs = mycheckout.ListOfOrderIDs.Select(id => Guid.Parse(id)).ToList();
-    //    try
-    //    {
-    //        idsOfOrderOfToday = orderService.GetAllOrdersById(mycheckout.ListOfOrderIDs.Select(id => Guid.Parse(id)).ToList());
-    //    }
-    //    catch { return BadRequest("There is an internal error in the system, one of today's orders cannot be found"); }
-    //    if (idsOfOrderOfToday == null) return BadRequest("there are no orders for todaty");//לבדקקקק
-    //    foreach (var order in idsOfOrderOfToday)
-    //    {
-    //        totalPriceForToday += order.ListOfShakes.Sum(shake => shake.Price);
-    //    }
-    //    DailyReport dailyReport = new DailyReport
-    //    {
-    //        CountOfOrders = countOfOrders,
-    //        TotalPriceForAllOrders = totalPriceForToday
-    //    };
-    //    return Ok(new { Message = "Close checkout  successfull Today!", Value = dailyReport });
 
+    [HttpGet("GetCheckoutByID/{id}")]
+    public IActionResult GetById(Guid id)
+    {
+        try
+        {
+            Checkout checkout = checkoutService.GetById(id);
+            return Ok(new { Message = "Get checkout succeeded", Value = checkout });
+        }
+        catch
+        {
+            return BadRequest("Error connecting to the database");
+        }
+    }
 
+        [HttpGet(Name = "CloseAcoountForToday")]
+        public IActionResult CloseAcoountForToday(string password)
+        {
+            int countOfOrders;
+            double totalPriceForToday = 0;
+            List<Order> idsOfOrderOfToday;
+            Checkout mycheckout;
+            if (password == null) return BadRequest("We cant close this checkout fot today becouse the password is empty");
+            try { mycheckout = checkoutService.GetByPassword(password); } catch { return BadRequest("Error connecting to the database"); }
+            if (mycheckout == null) return BadRequest("there are no checkout with this password!");
+            if (mycheckout.ListOfOrderIDs == null) countOfOrders = 0;
+            countOfOrders = mycheckout.ListOfOrderIDs.Count();
+            try { idsOfOrderOfToday = orderService.GetAllOrdersById(mycheckout.ListOfOrderIDs.Select(id => Guid.Parse(id)).ToList()); }
+            catch { return BadRequest("There is an internal error in the system, one of today's orders cannot be found"); }
+            if (idsOfOrderOfToday == null)
+                totalPriceForToday = 0;
+            else
+                totalPriceForToday = idsOfOrderOfToday.Sum(order => order.TotalPrice);
 
-    //}
-}
+            DailyReport dailyReport = new DailyReport
+            {
+                CountOfOrders = countOfOrders,
+                TotalPriceForAllOrders = totalPriceForToday
+            };
+            return Ok(new { Message = "Close checkout  successfull Today!", Value = dailyReport });
+        }
+    }

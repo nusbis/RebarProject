@@ -19,6 +19,7 @@ public class OrderController : ControllerBase
     public IActionResult AddOrder(OrderForClient orderForClient)
     {
         DateTime resultDateOfStartOrder;
+        Checkout myAcoount;
         if (orderForClient.lstShakes == null || orderForClient.lstShakes.Count == 0)
             return BadRequest("There are no items on order");
         if (orderForClient.lstShakes.Count > 10)
@@ -30,20 +31,28 @@ public class OrderController : ControllerBase
 
 
         double sumOfOrder = orderForClient.lstShakes.Sum(shake => shake.Price);
-
-        if (orderForClient.lstShakes.Any(item => shakeServer.GetById(item.IDShake) == null))
+        sumOfOrder= orderForClient.ListOfDiscount.Sum(dis=>dis.DiscountPercentages*0.1*sumOfOrder);
+        try
         {
-            return BadRequest("The shake does not exist in the database");
+            if (orderForClient.lstShakes.Any(item => shakeServer.GetById(item.IDShake) == null))
+                return BadRequest("The shake does not exist in the database");
         }
+        catch { return BadRequest("Error connecting to the database"); }
 
         Order newOrder = new Order
         {
             ListOfShakes = orderForClient.lstShakes,
             StartOrder = resultDateOfStartOrder,
-            NameOfCustomer = orderForClient.nameOfCustomer
+            NameOfCustomer = orderForClient.nameOfCustomer,
+            TotalPrice=sumOfOrder
         };
-        newOrder = orderServer.Add(newOrder);
-        Checkout myAcoount = accountService.GetById(orderForClient.IdAccount);
+        try
+        {
+            newOrder = orderServer.Add(newOrder);
+             myAcoount = accountService.GetById(orderForClient.IdAccount);
+            if (myAcoount == null) return BadRequest("The checkout does not exist in the database");
+        }
+        catch { return BadRequest("Error connecting to the database"); }
         if (myAcoount == null)
             return BadRequest("Account does not exist");
 
@@ -60,13 +69,7 @@ public class OrderController : ControllerBase
 
 
 
-    //foreach (var item in orderForClient.lstShakes)
-    //{
-    //    if (shakeServer.GetById(item.IDShake) == null)
-    //    {
-    //        return BadRequest("The shake does not exist in the database");
-    //    }
-    //}
+    
 
     //public bool ValidateString(string input)
     //{
@@ -75,12 +78,5 @@ public class OrderController : ControllerBase
 
     //    // בודקים האם המחרוזת מתאימה לתבנית הרגולרית.
     //    return Regex.IsMatch(input, pattern);
-    //}
-
-    //public bool DoesShakeExist(Guid id)
-    //{
-    //    if (shakeServer.GetById(id) != null)
-    //        return true;
-    //    return false;
     //}
 }

@@ -13,6 +13,7 @@ public class Order
     public DateTime StartOrder { get; set; }
     public string NameOfCustomer { get; set; }
     public DateTime EndOrder { get; }=DateTime.Now;
-  //  public List<Discount> ListOfDiscount { get; private set; } = null;
+    public List<Discount> ListOfDiscount { get; private set; } = new List<Discount>();
+    public double TotalPrice { get; set; }
 
 }
