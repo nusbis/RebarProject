@@ -11,7 +11,7 @@ public class Shake
     public string Name { get; set; }
     public string Description { get; set; }
     public double PriceS { get; set; }
-    public double PriceM { get; }
-    public double PriceL { get; }
+    public double PriceM { get; set; }
+    public double PriceL { get; set; }
 
 }

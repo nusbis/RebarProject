@@ -10,7 +10,7 @@ namespace RebarP.Controllers;
 [Route("[controller]")]
 public class OrderController : ControllerBase
 {
-    private ShakeServe shakeServer = new ShakeServe();
+    private ShakeService shakeServer = new ShakeService();
     private OrderService orderServer = new OrderService();
     private CheckoutService accountService = new CheckoutService();
 
@@ -18,20 +18,14 @@ public class OrderController : ControllerBase
     [HttpPost(Name = "AddOrder")]
     public IActionResult AddOrder(OrderForClient orderForClient)
     {
-        DateTime resultDateOfStartOrder;
         Checkout myAcoount;
-        if (orderForClient.lstShakes == null || orderForClient.lstShakes.Count == 0)
-            return BadRequest("There are no items on order");
-        if (orderForClient.lstShakes.Count > 10)
-            return BadRequest("An order can include a maximum of 10 shakes :)");
-        if (orderForClient.nameOfCustomer == null)
-            return BadRequest("Missing customer name");
-        if (!DateTime.TryParse(orderForClient.dateOfStartOrder, out resultDateOfStartOrder))
-            return BadRequest("Date not in correct format");
 
+        try { Validation.ValidationOfOrderForClient(orderForClient); }
+        catch (Exception ex){ return BadRequest(ex.Message); }
 
         double sumOfOrder = orderForClient.lstShakes.Sum(shake => shake.Price);
         sumOfOrder= orderForClient.ListOfDiscount.Sum(dis=>dis.DiscountPercentages*0.1*sumOfOrder);
+
         try
         {
             if (orderForClient.lstShakes.Any(item => shakeServer.GetById(item.IDShake) == null))
@@ -42,10 +36,11 @@ public class OrderController : ControllerBase
         Order newOrder = new Order
         {
             ListOfShakes = orderForClient.lstShakes,
-            StartOrder = resultDateOfStartOrder,
+            StartOrder =DateTime.Parse(orderForClient.dateOfStartOrder),
             NameOfCustomer = orderForClient.nameOfCustomer,
             TotalPrice=sumOfOrder
         };
+
         try
         {
             newOrder = orderServer.Add(newOrder);
@@ -53,8 +48,6 @@ public class OrderController : ControllerBase
             if (myAcoount == null) return BadRequest("The checkout does not exist in the database");
         }
         catch { return BadRequest("Error connecting to the database"); }
-        if (myAcoount == null)
-            return BadRequest("Account does not exist");
 
         try { accountService.AddOrderToAccount(newOrder.ID, myAcoount); }
         catch (Exception ex)

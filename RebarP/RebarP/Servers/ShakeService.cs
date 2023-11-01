@@ -3,12 +3,12 @@ using RebarP.Models;
 
 namespace RebarP.Servers;
 
-public class ShakeServe
+public class ShakeService
 {
     private ConnectionDB connect;
     private IMongoCollection<Shake> shakeCollection;
     private readonly string collectionShake = "shake";
-    public ShakeServe()
+    public ShakeService()
     {
         connect = new ConnectionDB();
         shakeCollection = connect.ConnectToMongoDB<Shake>(collectionShake);
@@ -21,6 +21,11 @@ public class ShakeServe
     public Shake GetById(Guid id)
     {
         return shakeCollection.Find(shake => shake.ID == id).FirstOrDefault();
+    }
+    public bool NameOfExistingShake(string name)
+    {
+        return shakeCollection.Find(shake => shake.Name == name).FirstOrDefault()!=null;
+
     }
     public void Add(Shake shake)
     {
