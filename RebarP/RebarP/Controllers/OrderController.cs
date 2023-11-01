@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using RebarP.Models;
 using RebarP.Servers;
 
@@ -14,26 +15,41 @@ public class OrderController : ControllerBase
 
 
     [HttpPost(Name = "AddOrder")]
-    public void AddOrder(OrderForClient orderForClient)
+    public IActionResult AddOrder(OrderForClient orderForClient)
     {
+        DateTime resultDateOfStartOrder;
         if (orderForClient.lstShakes == null || orderForClient.lstShakes.Count == 0)
-            throw new ArgumentNullException("There are no items on order");
+            return BadRequest("There are no items on order");
         if (orderForClient.lstShakes.Count > 10)
-            throw new ArgumentException("An order can include a maximum of 10 shakes :)");
+            return BadRequest("An order can include a maximum of 10 shakes :)");
         if (orderForClient.nameOfCustomer == null)
-            throw new ArgumentNullException("Missing customer name");
+            return BadRequest("Missing customer name");
+        if (!DateTime.TryParse(orderForClient.dateOfStartOrder, out resultDateOfStartOrder))
+            return BadRequest("Date not in correct format");
+
 
         double sumOfOrder = orderForClient.lstShakes.Sum(shake => shake.Price);
-        orderForClient.lstShakes.Select(item => shakeServer.GetById(item.ID));
+        foreach (var item in orderForClient.lstShakes)
+        {
+            if (shakeServer.GetById(item.IDShake)==null)
+            {
+                return BadRequest("The shake does not exist in the database");
+            }
+        }
         Order newOrder = new Order
         {
             ListOfShakes = orderForClient.lstShakes,
-            StartOrder = orderForClient.dateOfStartOrder,
+            StartOrder = resultDateOfStartOrder,
             NameOfCustomer=orderForClient.nameOfCustomer
         };
 
+
+
+
             orderServer.Add(newOrder);
 
+        //AddOrderToAccount
+        return Ok(new { Message = "Order successfully saved", Value = sumOfOrder });
 
     }
 

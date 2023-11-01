@@ -8,7 +8,7 @@ public class Order
    // private List<ShakeOfOrder> _listOfShakes;
     [BsonId]
     [BsonRepresentation(BsonType.String)]
-    public Guid ID { get;} = new Guid();
+    public Guid ID { get; private set; } = new Guid();
     public List<ShakeOfOrder> ListOfShakes { get; set; }
     public DateTime StartOrder { get; set; }
     public string NameOfCustomer { get; set; }
